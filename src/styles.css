@@ -1,0 +1,268 @@
+/* base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #f7f4ef;
+  --surface: #ffffff;
+  --text: #1c1a17;
+  --muted: #6b655c;
+  --accent: #c2410c;
+  --accent-dark: #9a3412;
+  --border: #e4ded4;
+  --radius: 10px;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+}
+
+.main-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+/* buttons */
+.btn {
+  display: inline-block;
+  padding: 0.55rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--accent-dark);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* navbar */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.5rem;
+  background: var(--text);
+  color: #fff;
+}
+
+.logo {
+  font-size: 1.35rem;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+}
+
+/* catalog */
+.catalog-hero {
+  text-align: center;
+  padding: 2rem 1rem 1rem;
+}
+
+.catalog-hero h1 {
+  margin: 0 0 0.4rem;
+}
+
+.catalog-hero p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.filter-pill {
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font: inherit;
+  cursor: pointer;
+}
+
+.filter-pill.active {
+  background: var(--text);
+  border-color: var(--text);
+  color: #fff;
+}
+
+/* grid: as many columns as fit the screen */
+.album-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 1.25rem;
+}
+
+.album-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.album-card-link {
+  text-decoration: none;
+  flex: 1;
+}
+
+.album-card-img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+.album-card-body {
+  padding: 0.8rem 1rem 0;
+}
+
+.album-card-body h3 {
+  margin: 0.35rem 0 0.15rem;
+  font-size: 1.05rem;
+}
+
+.album-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1rem 1rem;
+}
+
+.genre-tag {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.artist {
+  margin: 0;
+  color: var(--muted);
+}
+
+.price {
+  font-weight: 700;
+}
+
+.empty-state,
+.not-found {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+/* album details */
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.album-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.album-detail-img {
+  width: 100%;
+  border-radius: var(--radius);
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+.album-detail-info h1 {
+  margin: 0.3rem 0;
+}
+
+.price-lg {
+  font-size: 1.5rem;
+  margin: 0.75rem 0;
+}
+
+.description {
+  color: var(--muted);
+}
+
+.album-specs,
+.tracklist {
+  margin-top: 1.75rem;
+}
+
+.album-specs h2,
+.tracklist h2 {
+  font-size: 1.05rem;
+  margin-bottom: 0.5rem;
+}
+
+.album-specs dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.35rem 1.25rem;
+  margin: 0;
+}
+
+.album-specs dt {
+  color: var(--muted);
+}
+
+.album-specs dd {
+  margin: 0;
+}
+
+.low-stock {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.tracklist ol {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+/* stacks detail view on narrow screens */
+@media (max-width: 720px) {
+  .album-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
