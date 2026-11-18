@@ -1,33 +1,72 @@
+import { useState } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import CartDrawer from "./components/CartDrawer";
 import CatalogPage from "./pages/CatalogPage";
 import AlbumDetailPage from "./pages/AlbumDetailPage";
 import { ALBUMS } from "./data/albums";
 
 function App() {
-  // cart + isCartOpen state and the real handlers go here
-  // for now placeholder lets the add to cart button render without errors
-  const handleAddToCart = () => {};
+  /* lifted state: App is the closest common parent of Navbar, the pages, and CartDrawer so it owns the cart and everyone reads the same copy */
+  const [cart, setCart] = useState([]); // array of { ...album, quantity }
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  /* add an album, or change its quantity if its already in the cart. we always build a new array so react sees the change */
+  const handleAddToCart = (album) => {
+    setCart((prevCart) => {
+      const existing = prevCart.find((item) => item.id === album.id);
+
+      if (existing) {
+        // don't let quantity go past whats in stock
+        if (existing.quantity >= album.stock) return prevCart;
+        return prevCart.map((item) =>
+          item.id === album.id ? { ...item, quantity: item.quantity + 1 } : item,
+        );
+      }
+
+      return [...prevCart, { ...album, quantity: 1 }];
+    });
+    setIsCartOpen(true);
+  };
+
+  // delta is +1 or -1. quantity cant exceed stock. hitting 0 removes the line
+  const handleUpdateQuantity = (albumId, delta) => {
+    setCart((prevCart) =>
+      prevCart
+        .map((item) => {
+          if (item.id !== albumId) return item;
+          const newQty = Math.min(item.quantity + delta, item.stock);
+          return { ...item, quantity: newQty };
+        })
+        .filter((item) => item.quantity > 0),
+    );
+  };
+
+  const handleRemoveFromCart = (albumId) => {
+    setCart((prevCart) => prevCart.filter((item) => item.id !== albumId));
+  };
+
+  const handleOpenCart = () => setIsCartOpen(true);
+  const handleCloseCart = () => setIsCartOpen(false);
+
+  /* derived, not state. total number of records (3 copies of one album = 3). passed to both the badge and the drawer so they can never conflict */
+  const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <div className="app">
-      <Navbar />
+      <Navbar cartCount={totalCartCount} onOpenCart={handleOpenCart} />
 
       <main className="main-content">
-        {/* only the <route> whos path matches the url renders. navbar stays on every page */}
         <Routes>
           <Route
             path="/"
             element={<CatalogPage albums={ALBUMS} onAddToCart={handleAddToCart} />}
           />
-          {/* ":albumId" is a url parameter: /album/alb-03 = albumId = "alb-03" */}
           <Route
             path="/album/:albumId"
             element={<AlbumDetailPage albums={ALBUMS} onAddToCart={handleAddToCart} />}
           />
-          {/* tomorrow note to self add the /checkout route here */}
 
-          {/* any url that doesnt match anything above */}
           <Route
             path="*"
             element={
@@ -39,6 +78,16 @@ function App() {
           />
         </Routes>
       </main>
+
+      {/* outside <Routes> so the drawer is available on every page */}
+      <CartDrawer
+        cart={cart}
+        isOpen={isCartOpen}
+        cartCount={totalCartCount}
+        onClose={handleCloseCart}
+        onUpdateQuantity={handleUpdateQuantity}
+        onRemove={handleRemoveFromCart}
+      />
     </div>
   );
 }
