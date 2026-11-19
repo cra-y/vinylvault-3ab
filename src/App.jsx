@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar";
 import CartDrawer from "./components/CartDrawer";
 import CatalogPage from "./pages/CatalogPage";
 import AlbumDetailPage from "./pages/AlbumDetailPage";
+import CheckoutPage from "./pages/CheckoutPage";
 import { ALBUMS } from "./data/albums";
 
 function App() {
@@ -46,6 +47,9 @@ function App() {
     setCart((prevCart) => prevCart.filter((item) => item.id !== albumId));
   };
 
+  // called by CheckoutPage after a valid order. a new empty array, not cart.length = 0
+  const handleClearCart = () => setCart([]);
+
   const handleOpenCart = () => setIsCartOpen(true);
   const handleCloseCart = () => setIsCartOpen(false);
 
@@ -65,6 +69,10 @@ function App() {
           <Route
             path="/album/:albumId"
             element={<AlbumDetailPage albums={ALBUMS} onAddToCart={handleAddToCart} />}
+          />
+          <Route
+            path="/checkout"
+            element={<CheckoutPage cart={cart} onClearCart={handleClearCart} />}
           />
 
           <Route

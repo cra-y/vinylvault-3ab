@@ -450,3 +450,129 @@ a {
   width: 100%;
   text-align: center;
 }
+
+/* checkout */
+.checkout h1 {
+  margin-top: 0;
+}
+
+.checkout-grid {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.checkout-form fieldset {
+  margin: 0 0 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.checkout-form legend {
+  padding: 0 0.4rem;
+  font-weight: 700;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: inherit;
+}
+
+.form-group input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.form-group input.input-error {
+  border-color: #b91c1c;
+}
+
+.field-error {
+  margin: 0.3rem 0 0;
+  color: #b91c1c;
+  font-size: 0.85rem;
+}
+
+.form-note {
+  margin: 0 0 1rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.payment-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 0 1rem;
+}
+
+.order-summary {
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.order-summary h2 {
+  margin-top: 0;
+  font-size: 1.15rem;
+}
+
+.summary-list {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0 0 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.3rem 0;
+}
+
+.summary-total {
+  margin-top: 0.4rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border);
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.order-confirmation {
+  max-width: 520px;
+  margin: 3rem auto;
+  padding: 2rem;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+@media (max-width: 720px) {
+  .checkout-grid,
+  .payment-grid {
+    grid-template-columns: 1fr;
+  }
+}
