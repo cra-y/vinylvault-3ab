@@ -7,7 +7,7 @@ A single-page React application for browsing, filtering, and purchasing vinyl re
 ## 1. Project Setup & Execution Instructions
 
 ### Prerequisites
-- **Node.js v22 LTS or newer** Check with `node -v`.
+- **Node.js v22 LTS or newer** (meets the course's v21+ requirement; current Vite needs v20.19+ or v22.12+). Check with `node -v`.
 - **npm v10+** Check with `npm -v`.
 - **Git**, to clone the repository.
 
@@ -30,12 +30,12 @@ A single-page React application for browsing, filtering, and purchasing vinyl re
    ```bash
    npm run dev
    ```
-2. The terminal prints a local URL (ie `http://localhost:xxx`). Open it in a browser.
-3. **Verify it works:** the catalog page loads with the album grid and genre filter buttons. Clicking an album opens `/album/<id>`, and the cart icon in the header opens the cart drawer.
+2. The terminal prints a local URL (usually `http://localhost:5173`). Open it in a browser.
+3. **Verify it works:** the catalog page loads with the album grid and genre filter buttons. Clicking an album opens `/album/<id>`, the cart icon in the header opens the cart drawer, and "Proceed to Checkout" opens `/checkout`.
 4. Press `Ctrl + C` in the terminal to stop the server.
 
 ### Directory Structure Overview
-All application code lives in `src/`, where `main.jsx` mounts the app inside the router and `App.jsx` owns the shared cart state and route definitions. `src/components/` holds reusable UI pieces like navbar, album cards, and cart drawer. `src/pages/` holds the three routed views (catalog, album detail, and checkout). `src/data/albums.js` contains the album data (artist, genre, price, specs, and tracklist), `src/assets/` stores any local media. Config files such as `index.html`, `vite.config.js`, and `package.json` sit at the project root.
+All application code lives in `src/`, where `main.jsx` mounts the app inside the router and `App.jsx` owns the shared cart state and route definitions. `src/components/` holds reusable UI pieces like the navbar, album cards, and cart drawer, while `src/pages/` holds the three routed views (catalog, album detail, and checkout). `src/data/albums.js` contains the album data (artist, genre, price, specs, and tracklist), and `src/assets/` stores any local media. Config files such as `index.html`, `vite.config.js`, and `package.json` sit at the project root.
 
 ---
 
@@ -77,8 +77,8 @@ A **cart item** is an album object plus a quantity: `{ ...album, quantity: Numbe
     - `isCartOpen` [Boolean]: controls the drawer's visibility
   - **Derived values:** `totalCartCount` [Number] = sum of every item's `quantity` (shared by the badge and the drawer)
   - **Handlers defined here (all immutable updates):**
-    - `handleAddToCart(album)`: adds a new item or increments an existing one (`.map` / spread)
-    - `handleUpdateQuantity(albumId, delta)`: changes quantity by ±1 and removes the item at 0 (`.map` + `.filter`)
+    - `handleAddToCart(album)`: adds a new item or increments an existing one (`.map` / spread), never past `album.stock`; also opens the drawer
+    - `handleUpdateQuantity(albumId, delta)`: changes quantity by ±1 (capped at `stock`) and removes the item at 0 (`.map` + `.filter`)
     - `handleRemoveFromCart(albumId)`: deletes the line item (`.filter`)
     - `handleClearCart()`: resets `cart` to `[]` after checkout
     - `handleOpenCart()` / `handleCloseCart()`: toggle `isCartOpen`
@@ -128,18 +128,20 @@ A **cart item** is an album object plus a quantity: `{ ...album, quantity: Numbe
       - **Props:** `cart` [Array<CartItem>]
       - **Callbacks:** `onClearCart()`
       - **State:**
-        - `formData` [Object]: `{ fullName, address, city, postalCode, cardNumber }` (all controlled inputs)
-        - `errors` [Object]: validation messages keyed by field name
+        - `formData` [Object]: `{ fullName, address, city, postalCode, cardNumber, expiry, cvv }` [all Strings] (all controlled inputs)
+        - `errors` [Object]: validation messages keyed by field name (empty object = valid)
         - `isSubmitted` [Boolean]: switches to the confirmation view
-      - **Handlers (local):** `handleChange(e)`, `handleSubmit(e)` (`preventDefault` → validate → `onClearCart()` → `setIsSubmitted(true)`)
+      - **Derived:** `subtotal`, `tax` (6%), `total` [Number] from `cart`
+      - **Handlers (local):** `handleChange(e)` (one handler for all fields via the input's `name`), `handleSubmit(e)` (`preventDefault` → `validate(formData)` → stop if errors → `onClearCart()` → `setIsSubmitted(true)`)
+      - **Validation rules:** name ≥ 2 chars; address and city required; 5-digit postal code; 16-digit card number; MM/YY expiry not in the past; 3–4 digit CVV
       - **Edge case:** an empty cart (and no completed order) shows a "Your cart is empty" message with a `<Link>` to `/`
       - **`<CheckoutForm>`** → `src/components/CheckoutForm.jsx` (rendered while `isSubmitted` is `false`)
         - **Props:** `formData` [Object], `errors` [Object], `total` [Number] (shown on the submit button)
         - **Callbacks:** `onChange(e)` (receives `handleChange`), `onSubmit(e)` (receives `handleSubmit`)
         - **State:** none (inputs are controlled by `formData`, which CheckoutPage owns)
       - **`<OrderSummary>`** → `src/components/OrderSummary.jsx` (rendered while `isSubmitted` is `false`)
-        - **Props:** `cart` [Array<CartItem>]
-        - **State:** none; derives `subtotal`, `tax`, and `total` [Number] from `cart`
+        - **Props:** `cart` [Array<CartItem>], `subtotal` [Number], `tax` [Number], `total` [Number]
+        - **State:** none (totals come from CheckoutPage so the summary and submit button always match)
       - **`<OrderConfirmation>`** → `src/components/OrderConfirmation.jsx` (rendered when `isSubmitted` is `true`)
         - **Props:** `fullName` [String] (from `formData`, because the cart is already cleared at this point)
         - **State:** none; includes a `<Link to="/">` to keep shopping
@@ -149,9 +151,11 @@ A **cart item** is an album object plus a quantity: `{ ...album, quantity: Numbe
     - **Callbacks:** `onClose()`, `onUpdateQuantity(albumId, delta)`, `onRemove(albumId)`
     - **Hooks:** `useNavigate()` for "Proceed to Checkout" (`onClose()` then `navigate("/checkout")`)
     - **Derived:** `subtotal` [Number] = Σ `price × quantity`
+    - Always rendered; an `open` class slides the panel in with a CSS transform, and clicking the overlay calls `onClose()`
     - **`<CartItem>`** (one per cart item via `.map()`) → `src/components/CartItem.jsx`
       - **Props:** `item` [Object<CartItem>]
       - **Callbacks:** `onUpdateQuantity(item.id, ±1)`, `onRemove(item.id)`
+      - **State:** none; the + button is disabled when `quantity` reaches `stock`
 
 ### State Flow Summary
-`cart` and `isCartOpen` are in `App` because there are several components that aren't parent and child need them at once: the Navbar badge, the CartDrawer, the catalog and detail pages, and the checkout page. setting that state to the nearest common ancestor gives everyone a single source so the badge and drawer can never disagree. Data flows down as props, and events flow up through callbacks. A callback is a function defined in the parent and passed to a child, which calls it to report an action. The parent then updates its own state with operations (`.map()`, `.filter()`, spread), and React redoes every component that depends on that state.
+`cart` and `isCartOpen` are in `App` because several components that aren't parent and child need them at once: the Navbar badge, the CartDrawer, the catalog and detail pages, and the checkout page. Lifting that state to the nearest common ancestor gives everyone a single source so the badge and drawer can never disagree. Data flows down as props, and events flow up through callbacks. A callback is a function defined in the parent and passed to a child, which calls it to report an action. The parent then updates its own state with operations (`.map()`, `.filter()`, spread), and React re-renders every component that depends on that state.
